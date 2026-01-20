@@ -1,0 +1,1 @@
+[{"uid":"5f48b38f7962338d","name":"Тест на авторизацию с валидными данными","time":{"start":1768931712441,"stop":1768931713101,"duration":660},"status":"passed","severity":"normal"},{"uid":"d672b4762aa62911","name":"Тест на авторизацию с неверными данными","time":{"start":1768931711429,"stop":1768931712120,"duration":691},"status":"passed","severity":"normal"}]
