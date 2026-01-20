@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -17,34 +17,32 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg
+        
+        # Устанавливаем Chrome
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Install Python dependencies
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install Chrome (headless)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y chromium-browser chromium-chromedriver
-
     - name: Run tests
-      env:
-        PYTHONPATH: .
       run: |
         pytest --alluredir=allure-results
 
     - name: Generate Allure report
-      run: |
-        sudo apt-get install -y default-jre
-        wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
-        tar -zxvf allure-2.24.0.tgz -C /opt/
-        sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
-        allure generate allure-results -o allure-report --clean
-
-    - uses: actions/upload-artifact@v4
+      uses: simple-elf/allure-report-action@v1.7
       with:
-        name: allure-report
-        path: allure-report
+        allure_results: allure-results
+        allure_report: allure-report
+        keep_reports: 5
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
